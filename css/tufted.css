@@ -6,6 +6,7 @@ CSS VARIABLES
 	--highlight-weak: rgba(128, 128, 128, 0.2);
 	--highlight-strong: rgba(128, 128, 128, 0.4);
 	--radius-sm: 0.2rem;
+	--toc-drawer-width: 18rem;
 }
 
 /*******************************************************************************
@@ -772,58 +773,143 @@ BLOG INDEX
 }
 
 /*******************************************************************************
-TABLE OF CONTENTS
+TABLE OF CONTENTS (Drawer)
 *******************************************************************************/
 
-.toc-sidebar {
-	position: fixed;
-	top: 15rem;
-	left: 1%;
-	z-index: 10;
-	display: none;
-	width: 10.5%;
-	max-height: calc(100vh - 11rem);
-	overflow-y: auto;
-	color: var(--theme-line-numbers-text, #aaa);
+.toc-toggle-btn {
+	font-size: 1.4rem;
+	cursor: pointer;
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	color: var(--theme-text);
+	margin-right: 0.5em;
+	margin-top: 1em;
+	transition: opacity 0.15s ease;
 }
 
-.toc-sidebar ol {
+.toc-toggle-btn:hover {
+	opacity: 0.7;
+}
+
+.toc-drawer {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: var(--toc-drawer-width);
+	height: 100vh;
+	z-index: 45;
+	background: var(--theme-bg);
+	box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+	border-right: 1px solid var(--theme-table-border, #ccc);
+	transform: translateX(calc(-1 * var(--toc-drawer-width)));
+	transition:
+		transform 0.3s ease,
+		visibility 0s 0.3s;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	visibility: hidden;
+}
+
+.toc-drawer.open {
+	transform: translateX(0);
+	visibility: visible;
+	transition:
+		transform 0.3s ease,
+		visibility 0s 0s;
+}
+
+.toc-drawer-inner {
+	padding: 5rem 0.75rem 2rem 1.5rem;
+	font-size: 0.9rem;
+	line-height: 1.7;
+	color: var(--theme-text);
+}
+
+.toc-resize-handle {
+	position: absolute;
+	top: 0;
+	right: -4px;
+	height: 100%;
+	width: 16px;
+	cursor: col-resize;
+	z-index: 2;
+}
+
+.toc-resize-handle::after {
+	content: "⋮";
+	position: fixed;
+	top: 50%;
+	left: calc(var(--toc-drawer-width) - 8px);
+	transform: translate(-50%, -50%);
+	font-size: 1rem;
+	color: var(--theme-line-numbers-text, #aaa);
+	pointer-events: none;
+	z-index: 47;
+	opacity: 0;
+	transition: opacity 0.15s;
+}
+
+.toc-drawer.open .toc-resize-handle::after {
+	opacity: 1;
+}
+
+.toc-tree {
+	list-style: none;
 	margin: 0;
 	padding: 0;
-	list-style: none;
 }
 
-.toc-sidebar li {
-	margin: 0 0 0.2em;
+.toc-tree .toc-tree {
+	padding-left: 1rem;
 }
 
-.toc-sidebar .toc-after-title {
-	padding-left: 0.8em;
+.toc-node {
+	margin: 0;
 }
 
-.toc-sidebar a:any-link {
-	display: block;
-	color: inherit;
-	font-size: 0.95rem;
-	line-height: 1.1;
+.toc-row {
+	display: flex;
+	align-items: baseline;
+	gap: 0.3rem;
+	padding: 0.1rem 0;
+}
+
+.toc-toggle {
+	cursor: pointer;
+	user-select: none;
+	font-size: 0.75em;
+	color: var(--theme-line-numbers-text, #aaa);
+	flex-shrink: 0;
+	width: 1em;
+	text-align: center;
+}
+
+.toc-toggle:hover {
+	color: var(--theme-text);
+}
+
+.toc-spacer {
+	width: 1em;
+	flex-shrink: 0;
+}
+
+.toc-row a {
 	text-decoration: none;
-	border-left: 1px solid transparent;
-	padding-left: 0.6em;
-	transition:
-		border-color 120ms ease,
-		color 120ms ease;
+	color: inherit;
+	opacity: 0.7;
+	font-size: 0.95rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.toc-sidebar a:hover,
-.toc-sidebar a:focus-visible,
-.toc-sidebar a.is-active {
-	color: var(--theme-copy-btn-hover-text, #333);
-	border-left-color: currentColor;
-	outline: none;
+.toc-row a:hover {
+	opacity: 1;
 }
 
-@media (min-width: 1200px) {
-	.toc-sidebar {
-		display: block;
+@media (max-width: 760px) {
+	:root {
+		--toc-drawer-width: 80vw;
 	}
 }

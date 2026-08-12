@@ -117,6 +117,32 @@
             html.nav(
               class: "site-nav",
               {
+                html.elem(
+                  "button",
+                  attrs: (
+                    id: "toc-toggle",
+                    class: "toc-toggle-btn",
+                    type: "button",
+                    "aria-label": "切换目录",
+                  ),
+                  html.elem(
+                    "svg",
+                    attrs: (
+                      "xmlns": "http://www.w3.org/2000/svg",
+                      width: "1em",
+                      height: "1em",
+                      fill: "none",
+                      stroke: "currentColor",
+                      "stroke-width": "2",
+                      "stroke-linecap": "round",
+                      viewBox: "0 0 24 24",
+                    ),
+                    html.elem(
+                      "path",
+                      attrs: (d: "M4 6h16M4 12h16M4 18h16"),
+                    ),
+                  ),
+                )
                 for (href, title) in header-links {
                   html.a(href: href, title)
                 }
@@ -143,6 +169,16 @@
               },
             )
           }
+        )
+
+        // Table of contents drawer
+        html.elem(
+          "aside",
+          attrs: (id: "toc-drawer", class: "toc-drawer"),
+          {
+            html.div(class: "toc-drawer-inner")
+            html.div(id: "toc-resize-handle", class: "toc-resize-handle")
+          },
         )
 
         // Main content
