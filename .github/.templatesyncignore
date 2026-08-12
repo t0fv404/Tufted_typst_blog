@@ -3,7 +3,7 @@ content/
 config.typ
 
 # User-owned styling / branding
-assets/custom.css
+css/custom.css
 assets/favicon.ico
 
 # Documentation

@@ -54,6 +54,8 @@ from typing import Literal
 CONTENT_DIR = Path("content")  # 源文件目录
 SITE_DIR = Path("_site")  # 输出目录
 ASSETS_DIR = Path("assets")  # 静态资源目录
+CSS_DIR = Path("css")  # CSS 样式目录
+JS_DIR = Path("js")  # JS 脚本目录
 CONFIG_FILE = Path("config.typ")  # 全局配置文件
 MATHML_MIN_TYPST_VERSION = (0, 15, 0)
 
@@ -617,22 +619,23 @@ def build_pdf(force: bool = False) -> bool:
 def copy_assets() -> bool:
     """
     复制静态资源到输出目录。
+    将 css/、js/ 和 assets/ 目录复制到 _site/ 下。
     """
-    if not ASSETS_DIR.exists():
-        print(f"  ⚠ 静态资源目录 {ASSETS_DIR} 不存在。")
-        return True
-
     SITE_DIR.mkdir(parents=True, exist_ok=True)
-    target_dir = SITE_DIR / "assets"
 
-    try:
-        if target_dir.exists():
-            shutil.rmtree(target_dir)
-        shutil.copytree(ASSETS_DIR, target_dir)
-        return True
-    except Exception as e:
-        print(f"  ❌ 复制静态资源失败: {e}")
-        return False
+    for src_dir in (CSS_DIR, JS_DIR, ASSETS_DIR):
+        if not src_dir.exists():
+            continue
+        target_dir = SITE_DIR / src_dir
+        try:
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
+            shutil.copytree(src_dir, target_dir)
+        except Exception as e:
+            print(f"  ❌ 复制 {src_dir} 失败: {e}")
+            return False
+    return True
+
 
 
 def copy_content_assets(force: bool = False) -> bool:
