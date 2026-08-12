@@ -84,6 +84,7 @@
           "/js/code-blocks.js",
           "/js/format-headings.js",
           "/js/theme-toggle.js",
+          "/js/rss-copy.js",
           "/js/marginnote-toggle.js",
           "/js/toc.js",
           "/js/back-to-top.js",
@@ -119,6 +120,16 @@
                 for (href, title) in header-links {
                   html.a(href: href, title)
                 }
+                html.elem(
+                  "button",
+                  attrs: (
+                    id: "rss-copy",
+                    class: "rss-btn",
+                    type: "button",
+                    "aria-label": "Copy RSS link",
+                  ),
+                  "",
+                )
                 html.elem(
                   "button",
                   attrs: (

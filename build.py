@@ -931,25 +931,31 @@ def collect_posts(dirs: set[str], site_url: str) -> list[dict]:
     for d in dirs:
         dir_path = SITE_DIR / d
 
-        for item in dir_path.iterdir():
-            if not item.is_dir():
-                continue
+        # 递归查找所有文章目录（支持 posts/<分类>/<文章>/index.html 多层结构）
+        for index_html in dir_path.rglob("index.html"):
+            article_dir = index_html.parent
 
-            index_html = item / "index.html"
-            if not index_html.exists():
+            # 跳过订阅目录自身的 index.html（如 _site/posts/index.html）
+            if article_dir == dir_path:
                 continue
 
             title, description, link, date_obj = extract_post_metadata(index_html)
 
             if not date_obj:
-                print(f"⚠️ 无法确定文章 '{item.name}' 的日期，已跳过。")
+                print(f"⚠️ 无法确定文章 '{article_dir.name}' 的日期，已跳过。")
                 continue
+
+            # 分类 = 文章相对订阅目录的第一层路径段
+            try:
+                rel_parts = article_dir.relative_to(dir_path).parts
+            except ValueError:
+                rel_parts = ()
 
             posts.append(
                 {
                     "title": title,
                     "description": description,
-                    "dir": d,
+                    "dir": rel_parts[0] if rel_parts else d,
                     "link": link,
                     "date": date_obj,
                 }
