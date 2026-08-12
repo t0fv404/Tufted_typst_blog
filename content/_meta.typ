@@ -14,5 +14,6 @@
     description: "",
     date: datetime(year: 2026, month: 8, day: 13),
     lang: "zh",
+    category: "example",
   ),
 )
