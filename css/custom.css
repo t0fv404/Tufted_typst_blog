@@ -3,3 +3,11 @@ CUSTOM STYLES
 
 Add your custom CSS styles here to override or extend the default styles.
 *******************************************************************************/
+
+/* 去除 footnote-ref 鼠标停留动画效果 */
+.footnote-ref,
+.footnote-ref + .marginnote {
+	transition:
+		background-color 0.3s ease,
+		box-shadow 0.3s ease;
+}
