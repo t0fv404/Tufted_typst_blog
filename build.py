@@ -190,12 +190,33 @@ def get_file_mtime(path: Path) -> float:
         return 0.0
 
 
+def is_page_file(path: Path) -> bool:
+    """
+    判断 content/ 下的 .typ 文件是否为独立页面。
+
+    路径中任何一段（目录或文件名）以下划线开头的，都视为库/数据文件
+    （如 _data/meta.typ、_meta.typ），不是页面。
+
+    参数:
+        path: .typ 文件路径
+
+    返回:
+        bool: 是否为独立页面
+    """
+    try:
+        parts = path.resolve().relative_to(CONTENT_DIR.resolve()).parts
+    except ValueError:
+        return False
+    return not any(part.startswith("_") for part in parts)
+
+
 def is_dep_file(path: Path) -> bool:
     """
-    判断一个文件是否被追踪为依赖）。
+    判断一个文件是否被追踪为依赖。
 
-    content/ 下的普通页面文件不被视为模板文件，因为它们是独立的页面，
-    不应该相互依赖。
+    content/ 下的普通页面文件不被视为依赖，因为它们是独立的页面，
+    不应该相互依赖；其余文件（config.typ、tufted-lib、content/_* 库文件等）
+    都视为依赖。
 
     参数:
         path: 文件路径
@@ -214,15 +235,11 @@ def is_dep_file(path: Path) -> bool:
 
         # 检查是否在 content/ 目录下
         try:
-            relative_to_content = resolved_path.relative_to(content_dir)
-            # content/_* 目录下的文件视为依赖文件
-            parts = relative_to_content.parts
-            if len(parts) > 0 and parts[0].startswith("_"):
-                return True
-            # content/ 下的其他文件不是依赖文件
-            return False
+            resolved_path.relative_to(content_dir)
+            # content/ 下的非页面文件（_ 前缀路径段）是依赖
+            return not is_page_file(resolved_path)
         except ValueError:
-            # 不在 content/ 目录下，视为依赖文件（如 config.typ）
+            # 不在 content/ 目录下，视为依赖文件（如 tufted-lib）
             return True
 
     except Exception:
@@ -400,16 +417,15 @@ def find_common_dependencies() -> list[Path]:
 
 def find_typ_files() -> list[Path]:
     """
-    查找 content/ 目录下所有 .typ 文件，排除路径中包含以下划线开头的目录的文件。
+    查找 content/ 目录下所有 .typ 页面文件，排除库/数据文件
+    （路径中包含以下划线开头的段，如 _data/meta.typ）。
 
     返回:
         list[Path]: .typ 文件路径列表
     """
     typ_files = []
     for typ_file in CONTENT_DIR.rglob("*.typ"):
-        # 检查路径中是否有以下划线开头的目录
-        parts = typ_file.relative_to(CONTENT_DIR).parts
-        if not any(part.startswith("_") for part in parts):
+        if is_page_file(typ_file):
             typ_files.append(typ_file)
     return typ_files
 
@@ -635,7 +651,6 @@ def copy_assets() -> bool:
             print(f"  ❌ 复制 {src_dir} 失败: {e}")
             return False
     return True
-
 
 
 def copy_content_assets(force: bool = False) -> bool:
