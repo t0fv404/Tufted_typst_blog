@@ -11,3 +11,22 @@ Add your custom CSS styles here to override or extend the default styles.
 		background-color 0.3s ease,
 		box-shadow 0.3s ease;
 }
+
+/* 主题切换动画，使用 View Transition API */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+	z-index: 9999;
+	clip-path: circle(0% at var(--circle-x) var(--circle-y));
+	animation: theme-expand 0.5s ease-out forwards;
+}
+
+@keyframes theme-expand {
+	to {
+		clip-path: circle(var(--transition-radius) at var(--circle-x) var(--circle-y));
+	}
+}

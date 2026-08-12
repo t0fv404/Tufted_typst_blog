@@ -78,11 +78,36 @@
 
 	// Switch between light and dark mode for the current session.
 	function toggleTheme() {
+		const button = document.getElementById("theme-toggle");
+		if (button) {
+			const rect = button.getBoundingClientRect();
+			const cx = rect.left + rect.width / 2;
+			const cy = rect.top + rect.height / 2;
+			const maxRadius = Math.max(
+				Math.hypot(cx, cy),
+				Math.hypot(window.innerWidth - cx, cy),
+				Math.hypot(cx, window.innerHeight - cy),
+				Math.hypot(window.innerWidth - cx, window.innerHeight - cy),
+			);
+			document.documentElement.style.setProperty("--circle-x", cx + "px");
+			document.documentElement.style.setProperty("--circle-y", cy + "px");
+			document.documentElement.style.setProperty("--transition-radius", maxRadius + "px");
+		}
+
 		const currentTheme =
 			document.documentElement.getAttribute("data-theme") || getSystemTheme();
 		const newTheme = currentTheme === "dark" ? "light" : "dark";
-		setStoredTheme(newTheme);
-		applyTheme(newTheme);
+
+		const apply = () => {
+			setStoredTheme(newTheme);
+			applyTheme(newTheme);
+		};
+
+		if (document.startViewTransition) {
+			document.startViewTransition(() => apply());
+		} else {
+			apply();
+		}
 	}
 
 	// Apply the initial theme as early as possible to avoid flicker.
