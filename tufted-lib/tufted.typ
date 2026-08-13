@@ -21,6 +21,8 @@
   description: "",
   lang: "zh",
   date: none,
+  modified: none,
+  category: none,
   extra-info: none,
   website-title: "",
   website-url: none,
@@ -47,7 +49,7 @@
   show: template-notes
   show: template-figures
   show: template-links
-  show: template-byline.with(author: author, date: date, extra-info: extra-info)
+  show: template-byline.with(author: author, date: date, extra-info: extra-info, category: category, modified: modified)
 
   set text(lang: lang)
 

@@ -25,6 +25,7 @@ _site/
 target/
 
 # temp files
+content/_meta.typ
 *.tmp
 *.bak
 .DS_Store

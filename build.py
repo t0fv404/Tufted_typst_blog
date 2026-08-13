@@ -57,6 +57,9 @@ ASSETS_DIR = Path("assets")  # 静态资源目录
 CSS_DIR = Path("css")  # CSS 样式目录
 JS_DIR = Path("js")  # JS 脚本目录
 CONFIG_FILE = Path("config.typ")  # 全局配置文件
+POSTS_DIR = Path("content/posts")  # 文章目录
+POSTS_META_FILE = Path("content/_meta.typ")  # 自动生成的文章元数据
+UNCATEGORIZED = "未分类"  # 未声明分类时的默认分类
 MATHML_MIN_TYPST_VERSION = (0, 15, 0)
 
 
@@ -428,6 +431,113 @@ def find_typ_files() -> list[Path]:
         if is_page_file(typ_file):
             typ_files.append(typ_file)
     return typ_files
+
+
+def generate_posts_meta() -> bool:
+    """
+    扫描 content/posts/ 下所有 .typ 文章，从每篇文章的
+    #show: template.with(...) 中正则提取元数据，生成 content/_meta.typ。
+
+    提取字段: title / description / date / lang / category / modified
+    - category 由文章显式声明，未声明时归入 "未分类"
+    - slug 由文章相对 posts/ 的路径推导
+    - 缺少 title 或 date 的文章警告并跳过
+    """
+    if not POSTS_DIR.exists():
+        return True
+
+    posts = []
+    for typ_file in sorted(POSTS_DIR.rglob("*.typ")):
+        # 跳过以下划线开头的文件
+        if typ_file.name.startswith("_"):
+            continue
+
+        try:
+            text = typ_file.read_text(encoding="utf-8")
+        except Exception:
+            continue
+
+        m_title = re.search(r'title:\s*"([^"]*)"', text)
+        m_desc = re.search(r'description:\s*"([^"]*)"', text)
+        m_date = re.search(
+            r'date:\s*datetime\(\s*year:\s*(\d+)\s*,\s*month:\s*(\d+)\s*,\s*day:\s*(\d+)\s*\)',
+            text,
+        )
+        m_lang = re.search(r'lang:\s*"([^"]*)"', text)
+        m_category = re.search(r'category:\s*"([^"]*)"', text)
+        m_modified = re.search(
+            r'modified:\s*datetime\(\s*year:\s*(\d+)\s*,\s*month:\s*(\d+)\s*,\s*day:\s*(\d+)\s*\)',
+            text,
+        )
+
+        if not m_title or not m_date:
+            rel = typ_file.relative_to(Path("."))
+            print(f"  ⚠ {rel}: 缺少 title 或 date 元数据，已跳过")
+            continue
+
+        title = m_title.group(1)
+        description = m_desc.group(1) if m_desc else ""
+        date_str = (
+            f"{m_date.group(1)}-{m_date.group(2).zfill(2)}-{m_date.group(3).zfill(2)}"
+        )
+        datetime_str = (
+            f"datetime(year: {m_date.group(1)}, "
+            f"month: {int(m_date.group(2))}, "
+            f"day: {int(m_date.group(3))})"
+        )
+        lang = m_lang.group(1) if m_lang else "zh"
+        category = m_category.group(1) if m_category else UNCATEGORIZED
+
+        # slug = 相对 posts/ 的路径，不含 .typ 后缀
+        slug = typ_file.relative_to(POSTS_DIR).with_suffix("").as_posix()
+
+        entry = {
+            "slug": slug,
+            "title": title,
+            "description": description,
+            "date_str": date_str,
+            "datetime_str": datetime_str,
+            "lang": lang,
+            "category": category,
+            "modified": None,
+        }
+
+        if m_modified:
+            entry["modified"] = (
+                f"datetime(year: {m_modified.group(1)}, "
+                f"month: {int(m_modified.group(2))}, "
+                f"day: {int(m_modified.group(3))})"
+            )
+
+        posts.append(entry)
+
+    # 按日期倒序排列
+    posts.sort(key=lambda p: p["date_str"], reverse=True)
+
+    # 生成 _meta.typ
+    lines = [
+        "// 本文件由 build.py 自动生成，请勿手动编辑。",
+        "// 元数据在每篇文章的 #show: template.with(...) 中声明。",
+        "",
+        "#let posts = (",
+    ]
+    for p in posts:
+        lines.append("  (")
+        lines.append(f'    slug: "{p["slug"]}",')
+        lines.append(f'    title: "{p["title"]}",')
+        lines.append(f'    description: "{p["description"]}",')
+        lines.append(f"    date: {p['datetime_str']},")
+        lines.append(f'    lang: "{p["lang"]}",')
+        lines.append(f'    category: "{p["category"]}",')
+        if p["modified"]:
+            lines.append(f"    modified: {p['modified']},")
+        lines.append("  ),")
+    lines.append(")")
+
+    POSTS_META_FILE.parent.mkdir(parents=True, exist_ok=True)
+    POSTS_META_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"  📝 已生成 {POSTS_META_FILE} （{len(posts)} 篇文章）")
+    return True
 
 
 def get_file_output_path(typ_file: Path, type: Literal["pdf", "html"]) -> Path:
@@ -1204,6 +1314,7 @@ def build(force: bool = False) -> bool:
     results = []
 
     print()
+    generate_posts_meta()
     results.append(build_html(force))
     results.append(build_pdf(force))
     print()
