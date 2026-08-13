@@ -1,0 +1,18 @@
+# 用户内容与站点配置
+content/
+config.typ
+
+# 用户自定义样式
+css/custom.css
+
+# 二进制资源
+assets/
+
+# 文档（用户维护）
+README.md
+LICENSE
+TODO.md
+
+# 用户自己的同步 workflow（不被上游覆盖）
+.github/workflows/update.yml
+.forgejo/workflows/update.yml

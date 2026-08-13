@@ -19,6 +19,6 @@ jobs:
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v2
         with:
-          source_repo_path: Yousa-Mirage/Tufted-Blog-Template
+          source_repo_path: t0fv404/Tufted_typst_blog
           upstream_branch: main
           pr_labels: version_update

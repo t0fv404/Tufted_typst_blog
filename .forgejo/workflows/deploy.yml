@@ -1,0 +1,31 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: codeberg-tiny
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v6
+
+      # typst 官方只发布 musl 静态二进制 —— 静态链接，glibc/musl 主机都能跑
+      - name: Install Typst
+        run: |
+          mkdir -p ~/bin
+          curl -fsSL https://github.com/typst/typst/releases/latest/download/typst-x86_64-unknown-linux-musl.tar.xz \
+            | tar -xJ --strip-components=1 -C ~/bin
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+
+      - name: Build site
+        run: python3 build.py build -f
+
+      # 官方 git-pages action：自动推 pages 分支 + 触发发布，token 由 CI 注入，无需 PAT
+      - name: Deploy to Codeberg Pages
+        uses: https://codeberg.org/git-pages/action@v2
+        with:
+          site: https://${{ forge.repository_owner }}.codeberg.page/Tufted_typst_blog/
+          token: ${{ forge.token }}
+          source: _site/

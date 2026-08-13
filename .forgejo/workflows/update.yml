@@ -1,0 +1,44 @@
+name: Update
+
+on:
+  # manual trigger only
+  workflow_dispatch:
+
+jobs:
+  version_update:
+    runs-on: codeberg-tiny
+    steps:
+      - uses: https://data.forgejo.org/actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Sync from upstream
+        run: |
+          git config user.name "Update Bot"
+          git config user.email "update@noreply.codeberg.org"
+          git remote add upstream https://codeberg.org/t0fv404/Tufted_typst_blog.git || true
+          git fetch upstream main
+
+          # 无更新则直接结束
+          if git diff --quiet HEAD upstream/main; then
+            echo "无上游更新，跳过。"
+            exit 0
+          fi
+
+          # 以 upstream/main 为基建分支，再按 .templatesyncignore 恢复用户自己的文件
+          BRANCH="update/upstream-${{ github.run_number }}"
+          git checkout -b "$BRANCH" upstream/main
+          PATHS=$(sed -e 's/[[:space:]]*#.*//' -e 's/[[:space:]]*$//' \
+            .templatesyncignore | grep -v '^$' | tr '\n' ' ')
+          if [ -n "$PATHS" ]; then
+            git checkout origin/main -- $PATHS || true
+          fi
+          git commit -m "update: 保留用户内容与配置" || true
+
+          # 推送分支并用 Codeberg API 开 PR
+          git push -f "https://${{ github.actor }}:${{ secrets.FORGEJO_TOKEN }}@codeberg.org/${{ github.repository }}.git" "$BRANCH"
+          curl -fsS -X POST \
+            "https://codeberg.org/api/v1/repos/${{ github.repository }}/pulls" \
+            -H "Authorization: token ${{ secrets.FORGEJO_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"head":"'"$BRANCH"'","base":"main","title":"同步模板更新","body":"自动创建的同步 PR，请审查后合并。"}'
