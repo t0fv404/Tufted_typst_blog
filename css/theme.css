@@ -273,7 +273,6 @@ THEME TOGGLE BUTTON (DeepWiki Style)
 	border: none;
 	border-radius: 0.375rem;
 	cursor: pointer;
-	margin-left: auto;
 	margin-right: 3em;
 	margin-top: 1.6em;
 	transition: background-color 0.15s ease;
@@ -298,4 +297,23 @@ THEME TOGGLE BUTTON (DeepWiki Style)
 /* 深色模式下太阳图标颜色 */
 .theme-toggle-btn.is-dark {
 	color: #d1d5db;
+}
+
+/* 主题切换动画，使用 View Transition API */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+	z-index: 9999;
+	clip-path: circle(0% at var(--circle-x) var(--circle-y));
+	animation: theme-expand 0.5s ease-out forwards;
+}
+
+@keyframes theme-expand {
+	to {
+		clip-path: circle(var(--transition-radius) at var(--circle-x) var(--circle-y));
+	}
 }

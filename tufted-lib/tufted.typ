@@ -74,6 +74,7 @@
           "https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.8.0/tufte.min.css",
           "/css/tufted.css",
           "/css/theme.css",
+          "/css/rss.css",
         )
         for (css-link) in (base-css + css).dedup() {
           html.link(rel: "stylesheet", href: css-link)

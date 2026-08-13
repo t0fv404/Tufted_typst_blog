@@ -688,8 +688,8 @@ sup.footnote-ref {
 	box-shadow: 0 0 0 5px var(--highlight);
 	border-radius: var(--radius-sm);
 	transition:
-		background-color 0.3s ease 1s,
-		box-shadow 0.3s ease 1s;
+		background-color 0.3s ease,
+		box-shadow 0.3s ease;
 }
 
 /* Highlight margin note when footnote reference is hovered */

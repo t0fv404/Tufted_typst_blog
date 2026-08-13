@@ -1,0 +1,38 @@
+/* RSS 按钮 — 样式与主题切换按钮一致，位于其左侧 */
+.rss-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.4rem;
+	height: 2.4rem;
+	padding: 0;
+	background: transparent;
+	border: none;
+	border-radius: 0.375rem;
+	cursor: pointer;
+	margin-left: auto;
+	margin-right: 0.5em;
+	margin-top: 1.6em;
+	transition: background-color 0.15s ease;
+	color: #374151;
+	/* 浅色模式下 RSS 图标颜色 */
+}
+
+.rss-btn:hover {
+	background: var(--highlight-weak, rgba(128, 128, 128, 0.2));
+}
+
+.rss-btn:focus-visible {
+	outline: 2px solid var(--highlight-strong, rgba(128, 128, 128, 0.4));
+	outline-offset: 2px;
+}
+
+.rss-btn svg {
+	width: 1.8rem;
+	height: 1.8rem;
+}
+
+/* 深色模式下 RSS 图标颜色 */
+html[data-theme="dark"] .rss-btn {
+	color: #d1d5db;
+}
