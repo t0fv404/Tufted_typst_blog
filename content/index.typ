@@ -1,4 +1,4 @@
-#import "../config.typ": template
+#import "../config.typ": template, site-link
 #import "../tufted-lib/tufted.typ" as tufted
 
 #show: template
@@ -36,7 +36,7 @@
       post.date.display(),
     )
     html.div(class: "blog-entry-content", {
-      html.a(href: "/posts/" + post.slug + "/", post.title)
+      html.a(href: site-link(post.url), post.title)
     })
   })
 }

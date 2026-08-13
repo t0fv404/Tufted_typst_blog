@@ -43,6 +43,10 @@
 
   content,
 ) = {
+  let effective-site-url = sys.inputs.at("site-url", default: website-url)
+  let site-root = if effective-site-url == none { "" } else { effective-site-url.trim("/", at: end) }
+  let site-link = path => site-root + "/" + path.trim("/", at: start)
+
   // Apply styling
   show: template-math
   show: template-refs
@@ -66,37 +70,38 @@
           lang: lang,
           date: date,
           website-title: website-title,
-          website-url: website-url,
+          website-url: effective-site-url,
           image-path: image-path,
           feed-dir: feed-dir,
         )
+        html.meta(name: "site-url", content: site-link("/"))
 
         // load CSS
         let base-css = (
           "https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.8.0/tufte.min.css",
-          "/css/tufted.css",
-          "/css/theme.css",
-          "/css/rss.css",
-          "/css/search.css",
+          "css/tufted.css",
+          "css/theme.css",
+          "css/rss.css",
+          "css/search.css",
         )
         for (css-link) in (base-css + css).dedup() {
-          html.link(rel: "stylesheet", href: css-link)
+          html.link(rel: "stylesheet", href: if css-link.starts-with("http") { css-link } else { site-link(css-link) })
         }
 
         // load JS scripts
         let base-js = (
-          "/js/code-blocks.js",
-          "/js/format-headings.js",
-          "/js/theme-toggle.js",
-          "/js/rss-copy.js",
-          "/js/search.js",
-          "/js/marginnote-toggle.js",
-          "/js/toc.js",
-          "/js/back-to-top.js",
-          "/js/math-copy.js",
+          site-link("js/code-blocks.js"),
+          site-link("js/format-headings.js"),
+          site-link("js/theme-toggle.js"),
+          site-link("js/rss-copy.js"),
+          site-link("js/search.js"),
+          site-link("js/marginnote-toggle.js"),
+          site-link("js/toc.js"),
+          site-link("js/back-to-top.js"),
+          site-link("js/math-copy.js"),
         )
         for (js-src) in (base-js + js-scripts).dedup() {
-          html.script(src: js-src)
+          html.script(src: if js-src.starts-with("http") { js-src } else { site-link(js-src) })
         }
       })
 
@@ -149,7 +154,7 @@
                   ),
                 )
                 for (href, title) in header-links {
-                  html.a(href: href, title)
+                  html.a(href: site-link(href), title)
                 }
                 html.div(
                   class: "search-box",

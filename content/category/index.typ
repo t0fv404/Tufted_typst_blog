@@ -1,5 +1,5 @@
 // 类别页面 — 按目录层级分组显示所有文章
-#import "/content/index.typ": template, tufted
+#import "/content/index.typ": template, tufted, site-link
 
 #show: template.with(
   title: "文章分类",
@@ -63,7 +63,7 @@
         post.date.display(),
       )
       html.div(class: "blog-entry-content", {
-        html.a(href: "/posts/" + post.slug + "/", post.title)
+        html.a(href: site-link(post.url), post.title)
       })
     })
   }

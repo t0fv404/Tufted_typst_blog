@@ -1,6 +1,6 @@
 /**
  * search.js — 站内搜索
- * 点击放大镜展开灰线输入框，从 /search-index.json（构建时生成）加载索引，
+ * 点击放大镜展开灰线输入框，从 search-index.json（构建时生成）加载索引，
  * 按空格切分关键字，对标题/内容/分类/日期做 AND 匹配，下拉展示结果。
  */
 (() => {
@@ -23,7 +23,8 @@
 
 	async function loadIndex() {
 		try {
-			const res = await fetch("/search-index.json");
+			const siteUrl = document.querySelector('meta[name="site-url"]')?.content;
+			const res = await fetch(new URL("search-index.json", siteUrl));
 			if (!res.ok) return;
 			index = await res.json();
 		} catch {

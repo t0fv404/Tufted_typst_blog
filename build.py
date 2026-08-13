@@ -490,10 +490,19 @@ def generate_posts_meta() -> bool:
         category = m_category.group(1) if m_category else UNCATEGORIZED
 
         # slug = 相对 posts/ 的路径，不含 .typ 后缀
-        slug = typ_file.relative_to(POSTS_DIR).with_suffix("").as_posix()
+        # 目录式文章（xxx/index.typ）去掉文件名 index
+        # url 为相对站点根的路径（无前导斜杠），供各页面按自身深度拼接
+        rel = typ_file.relative_to(POSTS_DIR).with_suffix("")
+        if rel.name == "index":
+            slug = rel.parent.as_posix()
+            url = "posts/" + slug + "/"
+        else:
+            slug = rel.as_posix()
+            url = "posts/" + slug + ".html"
 
         entry = {
             "slug": slug,
+            "url": url,
             "title": title,
             "description": description,
             "date_str": date_str,
@@ -525,6 +534,7 @@ def generate_posts_meta() -> bool:
     for p in posts:
         lines.append("  (")
         lines.append(f'    slug: "{p["slug"]}",')
+        lines.append(f'    url: "{p["url"]}",')
         lines.append(f'    title: "{p["title"]}",')
         lines.append(f'    description: "{p["description"]}",')
         lines.append(f"    date: {p['datetime_str']},")
@@ -541,12 +551,12 @@ def generate_posts_meta() -> bool:
     return True
 
 
-def generate_search_index() -> bool:
+def generate_search_index(site_url: str) -> bool:
     """
     生成站内搜索索引，写入 _site/search-index.json。
 
     每条记录包含: url / title / description / category / date / content
-    - url 与实际产物路径一致（如 /posts/xxx/yyy.html）
+    - url 为当前构建目标下的完整文章 URL
     - content 为文章源文件全文，供内容搜索匹配
     """
     if not POSTS_DIR.exists():
@@ -573,9 +583,14 @@ def generate_search_index() -> bool:
         if not m_title or not m_date:
             continue
 
-        # URL 与实际产物路径一致
-        rel = typ_file.relative_to(CONTENT_DIR)
-        url = "/" + rel.with_suffix(".html").as_posix()
+        # URL 与实际产物路径一致，并包含当前站点根 URL：
+        # 目录式文章（xxx/index.typ）用尾斜杠 URL（Codeberg Pages 自动服务 index.html）
+        rel = typ_file.relative_to(CONTENT_DIR).with_suffix("")
+        if rel.name == "index":
+            path = rel.parent.as_posix() + "/"
+        else:
+            path = rel.with_suffix(".html").as_posix()
+        url = site_url.rstrip("/") + "/" + path
 
         entries.append(
             {
@@ -685,7 +700,7 @@ def _compile_files(
     return stats
 
 
-def build_html(force: bool = False) -> bool:
+def build_html(force: bool = False, site_url: str | None = None) -> bool:
     """
     编译所有 .typ 文件为 HTML（文件名中包含 PDF 的除外）。
 
@@ -739,6 +754,7 @@ def build_html(force: bool = False) -> bool:
             "html",
             "--input",
             f"page-path={page_path}",
+            *(["--input", f"site-url={site_url}"] if site_url else []),
             str(typ_file),
             str(output_path),
         ]
@@ -982,24 +998,13 @@ def parse_html_metadata(html_path: Path) -> dict[str, str]:
     return parser.metadata
 
 
-def get_site_url() -> str | None:
-    """
-    从生成的首页 HTML 文件中解析站点 URL。
-
-    功能:
-        从 _site/index.html 的 <link rel="canonical" href="..."> 提取 site-url。
-
-    返回:
-        str: 站点的根 URL（如 "https://example.com"），末尾不带斜杠。
-            如果未配置或解析失败则返回 None。
-    """
-    index_html = SITE_DIR / "index.html"
-    parser = parse_html_metadata(index_html)
-
-    if parser.get("link"):
-        return parser["link"].rstrip("/")
-
-    return None
+def get_config_site_url() -> str:
+    """从 config.typ 读取默认站点 URL。"""
+    content = CONFIG_FILE.read_text(encoding="utf-8")
+    match = re.search(r'#let\s+website-url\s*=\s*"([^"]+)"', content)
+    if not match:
+        raise ValueError("config.typ 中缺少 website-url 配置")
+    return match.group(1).rstrip("/") + "/"
 
 
 def get_feed_dirs() -> set[str]:
@@ -1362,7 +1367,7 @@ Sitemap: {site_url}/sitemap.xml
         return False
 
 
-def build(force: bool = False) -> bool:
+def build(force: bool = False, site_url: str | None = None) -> bool:
     """
     完整构建：HTML + PDF + 资源。
 
@@ -1384,20 +1389,21 @@ def build(force: bool = False) -> bool:
 
     generate_posts_meta()
     print()
-    results.append(build_html(force))
+    effective_site_url = site_url or get_config_site_url()
+    results.append(build_html(force, effective_site_url))
     results.append(build_pdf(force))
     print()
     print("正在构建 搜索索引...")
-    generate_search_index()
+    generate_search_index(effective_site_url)
     print()
 
     results.append(copy_assets())
     results.append(copy_content_assets(force))
 
-    if site_url := get_site_url():
-        results.append(generate_sitemap(site_url))
-        results.append(generate_robots_txt(site_url))
-        results.append(generate_rss(site_url))
+    if effective_site_url:
+        results.append(generate_sitemap(effective_site_url))
+        results.append(generate_robots_txt(effective_site_url))
+        results.append(generate_rss(effective_site_url))
 
     print("-" * 60)
     if all(results):
@@ -1440,9 +1446,11 @@ def create_parser() -> argparse.ArgumentParser:
 
     build_parser = subparsers.add_parser("build", help="完整构建 (HTML + PDF + 资源)")
     build_parser.add_argument("-f", "--force", action="store_true", help="强制完整重建")
+    build_parser.add_argument("--site-url", help="覆盖站点完整 URL")
 
     html_parser = subparsers.add_parser("html", help="仅构建 HTML 文件")
     html_parser.add_argument("-f", "--force", action="store_true", help="强制完整重建")
+    html_parser.add_argument("--site-url", help="覆盖站点完整 URL")
 
     pdf_parser = subparsers.add_parser("pdf", help="仅构建 PDF 文件")
     pdf_parser.add_argument("-f", "--force", action="store_true", help="强制完整重建")
@@ -1483,9 +1491,9 @@ if __name__ == "__main__":
     # 使用 match-case 执行对应的命令
     match args.command:
         case "build":
-            success = build(force)
+            success = build(force, getattr(args, "site_url", None))
         case "html":
-            success = build_html(force)
+            success = build_html(force, getattr(args, "site_url", None) or get_config_site_url())
         case "pdf":
             success = build_pdf(force)
         case "assets":
@@ -1493,7 +1501,10 @@ if __name__ == "__main__":
         case "clean":
             success = clean()
         case "preview":
-            success = preview(getattr(args, "port", 8000), getattr(args, "open_browser", True))
+            port = getattr(args, "port", 8000)
+            success = build(True, f"http://localhost:{port}/") and preview(
+                port, getattr(args, "open_browser", True)
+            )
         case _:
             print(f"❌ 未知命令: {args.command}")
             success = False

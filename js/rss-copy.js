@@ -29,7 +29,8 @@
 		let resetTimer = null;
 
 		button.addEventListener("click", async () => {
-			const url = new URL("/feed.xml", window.location.origin).href;
+			const siteUrl = document.querySelector('meta[name="site-url"]')?.content;
+			const url = new URL("feed.xml", siteUrl).href;
 			try {
 				await copyText(url);
 			} catch {
