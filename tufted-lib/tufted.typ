@@ -52,7 +52,7 @@
   show: template-refs
   show: template-notes
   show: template-figures
-  show: template-links
+  show: template-links.with(site-url: effective-site-url)
   show: template-byline.with(author: author, date: date, extra-info: extra-info, category: category, modified: modified)
 
   set text(lang: lang)
