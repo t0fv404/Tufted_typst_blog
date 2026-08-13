@@ -635,6 +635,20 @@ header.site-header {
 	margin-left: 0.35em;
 }
 
+/* Keep navigation available while preserving the page content beneath it. */
+header.site-nav-header {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	width: 100vw;
+	box-sizing: border-box;
+	margin: 0 calc(50% - 50vw);
+	padding: 0.5rem calc(50vw - 50% + 0.75rem);
+	background: color-mix(in srgb, var(--theme-bg) 76%, transparent);
+	backdrop-filter: blur(14px) saturate(140%);
+	-webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
 footer {
 	margin-top: 2em;
 	margin-bottom: 1em;

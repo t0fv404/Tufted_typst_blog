@@ -122,7 +122,7 @@
 
         // Add website navigation
         html.header(
-          class: "site-header",
+          class: "site-header site-nav-header",
           if header-links != none {
             html.nav(
               class: "site-nav",
