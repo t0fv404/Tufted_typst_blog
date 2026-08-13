@@ -241,7 +241,7 @@ h4,
 h5 {
 	font-style: normal;
 	font-weight: bold;
-	color: #111;
+	color: var(--theme-heading, #111);
 }
 
 h2 {
@@ -306,8 +306,8 @@ CODE BLOCKS AND INLINE CODE
 /* Code block container */
 pre {
 	position: relative;
-	background-color: #f7f7f7;
-	border: 1px solid #e0e0e0;
+	background-color: var(--theme-pre-bg, #f7f7f7);
+	border: 1px solid var(--theme-pre-border, #e0e0e0);
 	border-radius: 5px;
 	padding: 1em;
 	padding-bottom: 0.5em;
@@ -345,8 +345,8 @@ pre.has-line-numbers {
 	flex-direction: column;
 	padding-right: 0.4em;
 	margin-right: 0.4em;
-	border-right: 1px solid #ddd;
-	color: #aaa;
+	border-right: 1px solid var(--theme-line-numbers-border, #ddd);
+	color: var(--theme-line-numbers-text, #aaa);
 	user-select: none;
 	text-align: right;
 	min-width: 1.2em;
@@ -358,10 +358,10 @@ pre.has-line-numbers {
 /* Inline code */
 code {
 	font-size: 1.2rem;
-	background-color: #f7f7f7;
+	background-color: var(--theme-code-bg, #f7f7f7);
 	padding: 0.1em 0.3em;
 	border-radius: 3px;
-	border: 1px solid #e7e7e7;
+	border: 1px solid var(--theme-code-border, #e7e7e7);
 }
 
 /* Code blocks in lists */
@@ -384,9 +384,9 @@ figure pre {
 	right: 0.5em;
 	padding: 0.3em 0.6em;
 	font-size: 0.8rem;
-	color: #666;
-	background-color: #fff;
-	border: 1px solid #ccc;
+	color: var(--theme-copy-btn-text, #666);
+	background-color: var(--theme-copy-btn-bg, #fff);
+	border: 1px solid var(--theme-copy-btn-border, #ccc);
 	border-radius: 4px;
 	cursor: pointer;
 	opacity: 0;
@@ -400,14 +400,14 @@ pre:hover .copy-button {
 }
 
 .copy-button:hover {
-	background-color: #f0f0f0;
-	color: #333;
+	background-color: var(--theme-copy-btn-hover-bg, #f0f0f0);
+	color: var(--theme-copy-btn-hover-text, #333);
 }
 
 .copy-button.copied {
-	background-color: #e6fffa;
-	color: #008000;
-	border-color: #008000;
+	background-color: var(--theme-copy-btn-copied-bg, #e6fffa);
+	color: var(--theme-copy-btn-copied-text, #008000);
+	border-color: var(--theme-copy-btn-copied-border, #008000);
 }
 
 /*******************************************************************************
@@ -440,7 +440,7 @@ div[style*="border-inline-start"] p {
 div[style*="border-inline-start"] .footnote-ref,
 div[style*="border-inline-start"] .marginnote,
 div[style*="border-inline-start"] .footnote-ref a {
-	color: #111;
+	color: var(--theme-heading, #111);
 }
 
 /*******************************************************************************
@@ -468,24 +468,24 @@ section > table {
 table th,
 table td {
 	padding: 0.5em 0.7em;
-	border: 1px solid #ccc;
+	border: 1px solid var(--theme-table-border, #ccc);
 	text-align: left;
 	vertical-align: top;
 }
 
 table th,
 table thead td {
-	background-color: #f5f5f5;
+	background-color: var(--theme-table-header-bg, #f5f5f5);
 	font-weight: bold;
 	text-align: center;
 }
 
 table tbody tr:nth-child(even) {
-	background-color: #fafafa;
+	background-color: var(--theme-table-row-even, #fafafa);
 }
 
 table tbody tr:hover {
-	background-color: #f0f0f0;
+	background-color: var(--theme-table-row-hover, #f0f0f0);
 }
 
 @media (max-width: 760px) {
@@ -625,7 +625,7 @@ NAVBAR AND HEADER/FOOTER
 header.site-header,
 footer {
 	font-size: 1.1rem;
-	color: #666;
+	color: var(--theme-footer, #666);
 	line-height: 1.6;
 }
 

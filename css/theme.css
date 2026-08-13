@@ -36,6 +36,10 @@ CSS CUSTOM PROPERTIES (Theme Variables)
 	--theme-math-filter: none;
 	--theme-back-to-top: #555;
 	--theme-back-to-top-hover: #111;
+	--theme-nav-btn: #374151;
+	--theme-footer: #666;
+	/* 搜索命中高亮（主题中立色，浅色深色通用） */
+	--theme-search-highlight: rgba(255, 193, 7, 0.35);
 }
 
 /* Dark mode variables */
@@ -66,6 +70,8 @@ html:not([data-theme]) {
 	--theme-math-filter: invert(1) hue-rotate(180deg);
 	--theme-back-to-top: #bbb;
 	--theme-back-to-top-hover: #fff;
+	--theme-nav-btn: #d1d5db;
+	--theme-footer: #999;
 }
 
 /* System preference: only apply dark variables when no explicit theme is set */
@@ -96,6 +102,8 @@ html:not([data-theme]) {
 		--theme-math-filter: none;
 		--theme-back-to-top: #555;
 		--theme-back-to-top-hover: #111;
+		--theme-nav-btn: #374151;
+		--theme-footer: #666;
 	}
 }
 
@@ -273,10 +281,11 @@ THEME TOGGLE BUTTON (DeepWiki Style)
 	border: none;
 	border-radius: 0.375rem;
 	cursor: pointer;
+	font-size: inherit;
 	margin-right: 3em;
 	margin-top: 1.6em;
 	transition: background-color 0.15s ease;
-	color: #374151;
+	color: var(--theme-nav-btn);
 	/* 浅色模式下月亮图标颜色 */
 }
 
@@ -296,7 +305,7 @@ THEME TOGGLE BUTTON (DeepWiki Style)
 
 /* 深色模式下太阳图标颜色 */
 .theme-toggle-btn.is-dark {
-	color: #d1d5db;
+	color: var(--theme-nav-btn);
 }
 
 /* 主题切换动画，使用 View Transition API */

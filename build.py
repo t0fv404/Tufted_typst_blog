@@ -34,6 +34,7 @@ Tufted Blog Template 构建脚本
 """
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -536,7 +537,63 @@ def generate_posts_meta() -> bool:
 
     POSTS_META_FILE.parent.mkdir(parents=True, exist_ok=True)
     POSTS_META_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"  📝 已生成 {POSTS_META_FILE} （{len(posts)} 篇文章）")
+    print(f"📝 已生成 {POSTS_META_FILE} （{len(posts)} 篇文章）")
+    return True
+
+
+def generate_search_index() -> bool:
+    """
+    生成站内搜索索引，写入 _site/search-index.json。
+
+    每条记录包含: url / title / description / category / date / content
+    - url 与实际产物路径一致（如 /posts/xxx/yyy.html）
+    - content 为文章源文件全文，供内容搜索匹配
+    """
+    if not POSTS_DIR.exists():
+        return True
+
+    entries = []
+    for typ_file in sorted(POSTS_DIR.rglob("*.typ")):
+        if typ_file.name.startswith("_"):
+            continue
+
+        try:
+            text = typ_file.read_text(encoding="utf-8")
+        except Exception:
+            continue
+
+        m_title = re.search(r'title:\s*"([^"]*)"', text)
+        m_desc = re.search(r'description:\s*"([^"]*)"', text)
+        m_date = re.search(
+            r'date:\s*datetime\(\s*year:\s*(\d+)\s*,\s*month:\s*(\d+)\s*,\s*day:\s*(\d+)\s*\)',
+            text,
+        )
+        m_category = re.search(r'category:\s*"([^"]*)"', text)
+
+        if not m_title or not m_date:
+            continue
+
+        # URL 与实际产物路径一致
+        rel = typ_file.relative_to(CONTENT_DIR)
+        url = "/" + rel.with_suffix(".html").as_posix()
+
+        entries.append(
+            {
+                "url": url,
+                "title": m_title.group(1),
+                "description": m_desc.group(1) if m_desc else "",
+                "category": m_category.group(1) if m_category else UNCATEGORIZED,
+                "date": (
+                    f"{m_date.group(1)}-{m_date.group(2).zfill(2)}-{m_date.group(3).zfill(2)}"
+                ),
+                "content": text,
+            }
+        )
+
+    out = SITE_DIR / "search-index.json"
+    SITE_DIR.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"🔍 已生成搜索索引: {out} ({len(entries)} 篇文章)")
     return True
 
 
@@ -819,23 +876,35 @@ def clean() -> bool:
     """
     print("正在清理生成的文件...")
 
-    if not SITE_DIR.exists():
+    cleaned = []
+
+    # 删除 _site 目录下的所有内容
+    if SITE_DIR.exists():
+        try:
+            for item in SITE_DIR.iterdir():
+                if item.is_dir():
+                    shutil.rmtree(item)
+                else:
+                    item.unlink()
+            cleaned.append(f"{SITE_DIR}/ 目录")
+        except Exception as e:
+            print(f"  ❌ 清理失败: {e}")
+            return False
+
+    # 删除自动生成的文章元数据
+    if POSTS_META_FILE.exists():
+        try:
+            POSTS_META_FILE.unlink()
+            cleaned.append(str(POSTS_META_FILE))
+        except Exception as e:
+            print(f"  ❌ 清理失败: {e}")
+            return False
+
+    if cleaned:
+        print(f"  🧹 已清理 {' 和 '.join(cleaned)}。")
+    else:
         print(f"  输出目录 {SITE_DIR} 不存在，无需清理。")
-        return True
-
-    try:
-        # 删除 _site 目录下的所有内容
-        for item in SITE_DIR.iterdir():
-            if item.is_dir():
-                shutil.rmtree(item)
-            else:
-                item.unlink()
-
-        print(f"  ✅ 已清理 {SITE_DIR}/ 目录。")
-        return True
-    except Exception as e:
-        print(f"  ❌ 清理失败: {e}")
-        return False
+    return True
 
 
 def preview(port: int = 8000, open_browser_flag: bool = True) -> bool:
@@ -1208,7 +1277,7 @@ def generate_rss(site_url: str) -> bool:
     try:
         rss_content = build_rss_xml(posts, config)
         rss_file.write_text(rss_content, encoding="utf-8")
-        print(f"✅ RSS 订阅源生成成功: {rss_file} ({len(posts)} 篇文章)")
+        print(f"📡 RSS 订阅源生成成功: {rss_file} ({len(posts)} 篇文章)")
         return True
     except ValueError as e:
         print("❌ 错误: RSS 订阅源生成失败")
@@ -1268,7 +1337,7 @@ def generate_sitemap(site_url: str) -> bool:
 
     try:
         sitemap_path.write_text(sitemap_content, encoding="utf-8")
-        print(f"✅ Sitemap 构建完成: 包含 {len(urlset)} 个页面")
+        print(f"🗺️ Sitemap 构建完成: 包含 {len(urlset)} 个页面")
         return True
     except Exception as e:
         print(f"❌ Sitemap 构建失败: {e}")
@@ -1313,10 +1382,13 @@ def build(force: bool = False) -> bool:
 
     results = []
 
-    print()
     generate_posts_meta()
+    print()
     results.append(build_html(force))
     results.append(build_pdf(force))
+    print()
+    print("正在构建 搜索索引...")
+    generate_search_index()
     print()
 
     results.append(copy_assets())

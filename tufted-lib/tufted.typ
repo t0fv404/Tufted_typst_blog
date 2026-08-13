@@ -77,6 +77,7 @@
           "/css/tufted.css",
           "/css/theme.css",
           "/css/rss.css",
+          "/css/search.css",
         )
         for (css-link) in (base-css + css).dedup() {
           html.link(rel: "stylesheet", href: css-link)
@@ -88,6 +89,7 @@
           "/js/format-headings.js",
           "/js/theme-toggle.js",
           "/js/rss-copy.js",
+          "/js/search.js",
           "/js/marginnote-toggle.js",
           "/js/toc.js",
           "/js/back-to-top.js",
@@ -149,6 +151,33 @@
                 for (href, title) in header-links {
                   html.a(href: href, title)
                 }
+                html.div(
+                  class: "search-box",
+                  {
+                    html.elem(
+                      "button",
+                      attrs: (
+                        id: "search-toggle",
+                        class: "search-toggle-btn",
+                        type: "button",
+                        "aria-label": "搜索文章",
+                      ),
+                      "",
+                    )
+                    html.elem(
+                      "input",
+                      attrs: (
+                        id: "search-input",
+                        class: "search-input",
+                        type: "search",
+                        placeholder: "可使用日期，内容，标题以及分类来搜索相关文章，使用空格以区分多个关键字",
+                        autocomplete: "off",
+                        "aria-label": "搜索文章",
+                      ),
+                    )
+                    html.div(id: "search-results", class: "search-results")
+                  },
+                )
                 html.elem(
                   "button",
                   attrs: (
