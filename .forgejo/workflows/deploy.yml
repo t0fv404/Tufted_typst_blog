@@ -20,12 +20,17 @@ jobs:
           echo "$HOME/bin" >> "$GITHUB_PATH"
 
       - name: Build site
-        run: python3 build.py build -f
+        env:
+          OWNER: ${{ forgejo.event.repository.owner.username }}
+          REPOSITORY: ${{ forgejo.event.repository.name }}
+        run: |
+          SITE_URL="https://$OWNER.codeberg.page/"
+          [ "$REPOSITORY" = "pages" ] || SITE_URL+="$REPOSITORY/"
+          python3 build.py build -f --site-url "$SITE_URL"
 
-      # 官方 git-pages action：自动推 pages 分支 + 触发发布，token 由 CI 注入，无需 PAT
       - name: Deploy to Codeberg Pages
         uses: https://codeberg.org/git-pages/action@v2
         with:
-          site: https://${{ forge.repository_owner }}.codeberg.page/Tufted_typst_blog/
-          token: ${{ forge.token }}
+          site: ${{ case(forgejo.event.repository.name == 'pages', format('https://{0}.codeberg.page/', forgejo.event.repository.owner.username), format('https://{0}.codeberg.page/{1}/', forgejo.event.repository.owner.username, forgejo.event.repository.name)) }}
+          token: ${{ forgejo.token }}
           source: _site/

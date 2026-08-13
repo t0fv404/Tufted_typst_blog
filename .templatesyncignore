@@ -1,4 +1,5 @@
 # 用户内容与站点配置
+.templatesyncignore
 content/
 config.typ
 
