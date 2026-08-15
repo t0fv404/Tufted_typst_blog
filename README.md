@@ -7,3 +7,14 @@
 ## 使用说明
 
 基本编译方式和原仓库说明无异，请看原仓库 README 相关说明。
+
+关于使用 codeberg pgae 且自定义域名的想法，请您修改 `.forgejo\workflows\deploy.yml` 的 `Deploy to Codeberg Pages` 为：
+```yml
+- name: Deploy to Codeberg Pages
+uses: https://codeberg.org/git-pages/action@v2
+with:
+site: https://{yourdomain.com}/ # 注意修改
+server: codeberg.page
+token: ${{ forge.token }}
+source: _site/
+```
