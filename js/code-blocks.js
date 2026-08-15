@@ -1,11 +1,21 @@
 /**
- * Enhances rendered code blocks with line numbers and a copy button.
+ * Enhances rendered code blocks with language labels, line numbers, and a copy button.
  */
 document.addEventListener("DOMContentLoaded", () => {
 	const codeBlocks = document.querySelectorAll("pre > code");
 
 	codeBlocks.forEach((codeBlock) => {
 		const pre = codeBlock.parentElement;
+		const language = codeBlock.dataset.lang || "";
+
+		// ========== Add language label ==========
+		if (!pre.querySelector(".code-language")) {
+			const label = document.createElement("span");
+			label.className = "code-language";
+			label.textContent = language;
+			pre.insertBefore(label, pre.firstChild);
+			pre.classList.add("has-code-language");
+		}
 
 		// ========== Add line numbers ==========
 		// Check if already processed
