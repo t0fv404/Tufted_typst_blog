@@ -24,9 +24,8 @@ jobs:
           OWNER: ${{ forgejo.event.repository.owner.username }}
           REPOSITORY: ${{ forgejo.event.repository.name }}
         run: |
-          SITE_URL="https://$OWNER.codeberg.page/"
           [ "$REPOSITORY" = "pages" ] || SITE_URL+="$REPOSITORY/"
-          python3 build.py build -f --site-url "$SITE_URL"
+          python3 build.py build -f
 
       - name: Deploy to Codeberg Pages
         uses: https://codeberg.org/git-pages/action@v2

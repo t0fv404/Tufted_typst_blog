@@ -18,3 +18,5 @@ server: codeberg.page
 token: ${{ forge.token }}
 source: _site/
 ```
+
+并且注意修改 `config.typ` 的 `website` 变量
