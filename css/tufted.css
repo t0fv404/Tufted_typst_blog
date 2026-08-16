@@ -409,14 +409,9 @@ figure pre {
 	border: 1px solid var(--theme-copy-btn-border, #ccc);
 	border-radius: 4px;
 	cursor: pointer;
-	opacity: 0;
-	transition:
-		opacity 0.2s,
-		background-color 0.2s;
-}
-
-pre:hover .copy-button {
 	opacity: 1;
+	transition:
+		background-color 0.2s;
 }
 
 .copy-button:hover {
