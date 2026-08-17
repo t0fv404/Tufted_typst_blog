@@ -63,6 +63,8 @@ POSTS_META_FILE = Path("content/_meta.typ")  # 自动生成的文章元数据
 UNCATEGORIZED = "未分类"  # 未声明分类时的默认分类
 MATHML_MIN_TYPST_VERSION = (0, 15, 0)
 
+# 剔除 Typst 注释：字符串原样保留（\1），// 行注释与 /* */ 块注释替换为空
+COMMENT_STRIP_RE = re.compile(r'("(?:[^"\\]|\\.)*")|//[^\n]*|/\*.*?\*/', re.DOTALL)
 
 @dataclass
 class BuildStats:
@@ -266,7 +268,7 @@ def find_typ_dependencies(typ_file: Path) -> set[Path]:
     dependencies: set[Path] = set()
 
     try:
-        content = typ_file.read_text(encoding="utf-8")
+        content = COMMENT_STRIP_RE.sub(r"\1", typ_file.read_text(encoding="utf-8"))
     except Exception:
         return dependencies
 
@@ -454,7 +456,7 @@ def generate_posts_meta() -> bool:
             continue
 
         try:
-            text = typ_file.read_text(encoding="utf-8")
+            text = COMMENT_STRIP_RE.sub(r"\1", typ_file.read_text(encoding="utf-8"))
         except Exception:
             continue
 
@@ -568,7 +570,7 @@ def generate_search_index(site_url: str) -> bool:
             continue
 
         try:
-            text = typ_file.read_text(encoding="utf-8")
+            text = COMMENT_STRIP_RE.sub(r"\1", typ_file.read_text(encoding="utf-8"))
         except Exception:
             continue
 
@@ -1000,7 +1002,7 @@ def parse_html_metadata(html_path: Path) -> dict[str, str]:
 
 def get_config_site_url() -> str:
     """从 config.typ 读取默认站点 URL。"""
-    content = CONFIG_FILE.read_text(encoding="utf-8")
+    content = COMMENT_STRIP_RE.sub(r"\1", CONFIG_FILE.read_text(encoding="utf-8"))
     match = re.search(r'#let\s+website-url\s*=\s*"([^"]+)"', content)
     if not match:
         raise ValueError("config.typ 中缺少 website-url 配置")
@@ -1021,11 +1023,7 @@ def get_feed_dirs() -> set[str]:
         return set()
 
     try:
-        content = CONFIG_FILE.read_text(encoding="utf-8")
-
-        # 移除注释
-        content = re.sub(r"//.*", "", content)
-        content = re.sub(r"/\*[\s\S]*?\*/", "", content)
+        content = COMMENT_STRIP_RE.sub(r"\1", CONFIG_FILE.read_text(encoding="utf-8"))
 
         match = re.search(r"feed-dir\s*:\s*\((.*?)\)", content, re.DOTALL)
         if match:
