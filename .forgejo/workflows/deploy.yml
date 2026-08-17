@@ -20,11 +20,7 @@ jobs:
           echo "$HOME/bin" >> "$GITHUB_PATH"
 
       - name: Build site
-        env:
-          OWNER: ${{ forgejo.event.repository.owner.username }}
-          REPOSITORY: ${{ forgejo.event.repository.name }}
         run: |
-          [ "$REPOSITORY" = "pages" ] || SITE_URL+="$REPOSITORY/"
           python3 build.py build -f
 
       - name: Deploy to Codeberg Pages
