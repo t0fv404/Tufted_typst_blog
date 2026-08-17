@@ -1499,10 +1499,7 @@ if __name__ == "__main__":
         case "clean":
             success = clean()
         case "preview":
-            port = getattr(args, "port", 8000)
-            success = build(True, f"http://localhost:{port}/") and preview(
-                port, getattr(args, "open_browser", True)
-            )
+            success = preview(getattr(args, "port", 8000), getattr(args, "open_browser", True))
         case _:
             print(f"❌ 未知命令: {args.command}")
             success = False
