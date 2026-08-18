@@ -5,6 +5,7 @@ config.typ
 
 # 用户自定义样式
 css/custom.css
+js/custom.js
 
 # 二进制资源
 assets/

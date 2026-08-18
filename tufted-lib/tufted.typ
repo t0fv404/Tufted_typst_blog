@@ -99,6 +99,7 @@
           site-link("js/back-to-top.js"),
           site-link("js/math-copy.js"),
           site-link("js/copy-button.js"),
+          site-link("js/custom.js"),
         )
         for (js-src) in (base-js + js-scripts).dedup() {
           html.script(src: if js-src.starts-with("http") { js-src } else { site-link(js-src) })

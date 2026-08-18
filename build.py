@@ -58,7 +58,7 @@ ASSETS_DIR = Path("assets")  # 静态资源目录
 CSS_DIR = Path("css")  # CSS 样式目录
 JS_DIR = Path("js")  # JS 脚本目录
 CONFIG_FILE = Path("config.typ")  # 全局配置文件
-POSTS_DIR = Path("content/posts")  # 文章目录
+POSTS_DIR = [Path("content/posts")]  # 文章目录，可配置多个目录
 POSTS_META_FILE = Path("content/_meta.typ")  # 自动生成的文章元数据
 UNCATEGORIZED = "未分类"  # 未声明分类时的默认分类
 MATHML_MIN_TYPST_VERSION = (0, 15, 0)
@@ -436,25 +436,34 @@ def find_typ_files() -> list[Path]:
     return typ_files
 
 
+def find_post_typ_files() -> list[Path]:
+    """查找 POSTS_DIR 配置的所有文章文件，并去除重复路径。"""
+    typ_files = set()
+    for posts_dir in POSTS_DIR:
+        if posts_dir.exists():
+            typ_files.update(
+                typ_file
+                for typ_file in posts_dir.rglob("*.typ")
+                if not typ_file.name.startswith("_")
+            )
+    return sorted(typ_files)
+
+
 def generate_posts_meta() -> bool:
     """
-    扫描 content/posts/ 下所有 .typ 文章，从每篇文章的
+    扫描 POSTS_DIR 配置的所有目录下的 .typ 文章，从每篇文章的
     #show: template.with(...) 中正则提取元数据，生成 content/_meta.typ。
 
     提取字段: title / description / date / lang / category / modified
     - category 由文章显式声明，未声明时归入 "未分类"
-    - slug 由文章相对 posts/ 的路径推导
+    - slug 由文章相对 content/ 的路径推导
     - 缺少 title 或 date 的文章警告并跳过
     """
-    if not POSTS_DIR.exists():
+    if not any(posts_dir.exists() for posts_dir in POSTS_DIR):
         return True
 
     posts = []
-    for typ_file in sorted(POSTS_DIR.rglob("*.typ")):
-        # 跳过以下划线开头的文件
-        if typ_file.name.startswith("_"):
-            continue
-
+    for typ_file in find_post_typ_files():
         try:
             text = COMMENT_STRIP_RE.sub(r"\1", typ_file.read_text(encoding="utf-8"))
         except Exception:
@@ -491,16 +500,16 @@ def generate_posts_meta() -> bool:
         lang = m_lang.group(1) if m_lang else "zh"
         category = m_category.group(1) if m_category else UNCATEGORIZED
 
-        # slug = 相对 posts/ 的路径，不含 .typ 后缀
+        # slug = 相对 content/ 的路径，不含 .typ 后缀
         # 目录式文章（xxx/index.typ）去掉文件名 index
         # url 为相对站点根的路径（无前导斜杠），供各页面按自身深度拼接
-        rel = typ_file.relative_to(POSTS_DIR).with_suffix("")
+        rel = typ_file.relative_to(CONTENT_DIR).with_suffix("")
         if rel.name == "index":
             slug = rel.parent.as_posix()
-            url = "posts/" + slug + "/"
+            url = slug + "/"
         else:
             slug = rel.as_posix()
-            url = "posts/" + slug + ".html"
+            url = slug + ".html"
 
         entry = {
             "slug": slug,
@@ -561,14 +570,11 @@ def generate_search_index(site_url: str) -> bool:
     - url 为当前构建目标下的完整文章 URL
     - content 为文章源文件全文，供内容搜索匹配
     """
-    if not POSTS_DIR.exists():
+    if not any(posts_dir.exists() for posts_dir in POSTS_DIR):
         return True
 
     entries = []
-    for typ_file in sorted(POSTS_DIR.rglob("*.typ")):
-        if typ_file.name.startswith("_"):
-            continue
-
+    for typ_file in find_post_typ_files():
         try:
             text = COMMENT_STRIP_RE.sub(r"\1", typ_file.read_text(encoding="utf-8"))
         except Exception:
