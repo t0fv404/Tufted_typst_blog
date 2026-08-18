@@ -93,12 +93,12 @@
           site-link("js/code-blocks.js"),
           site-link("js/format-headings.js"),
           site-link("js/theme-toggle.js"),
-          site-link("js/rss-copy.js"),
           site-link("js/search.js"),
           site-link("js/marginnote-toggle.js"),
           site-link("js/toc.js"),
           site-link("js/back-to-top.js"),
           site-link("js/math-copy.js"),
+          site-link("js/copy-button.js"),
         )
         for (js-src) in (base-js + js-scripts).dedup() {
           html.script(src: if js-src.starts-with("http") { js-src } else { site-link(js-src) })
@@ -190,8 +190,25 @@
                     class: "rss-btn",
                     type: "button",
                     "aria-label": "Copy RSS link",
+                    "data-copy-value": site-link("feed.xml"),
+                    "data-copy-label": "RSS 链接已复制",
                   ),
-                  "",
+                  html.elem(
+                    "svg",
+                    attrs: (
+                      "xmlns": "http://www.w3.org/2000/svg",
+                      width: "1em",
+                      height: "1em",
+                      fill: "currentColor",
+                      viewBox: "0 0 256 256",
+                    ),
+                    html.elem(
+                      "path",
+                      attrs: (
+                        d: "M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM76,200a12,12,0,1,1,12-12A12,12,0,0,1,76,200Zm52,0a8,8,0,0,1-8-8,56.06,56.06,0,0,0-56-56,8,8,0,0,1,0-16,72.08,72.08,0,0,1,72,72A8,8,0,0,1,128,200Zm48,0a8,8,0,0,1-8-8A104.11,104.11,0,0,0,64,88a8,8,0,0,1,0-16A120.13,120.13,0,0,1,184,192,8,8,0,0,1,176,200Z",
+                      ),
+                    ),
+                  ),
                 )
                 html.elem(
                   "button",
