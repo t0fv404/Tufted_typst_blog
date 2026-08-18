@@ -272,6 +272,28 @@ h5 {
 	margin-bottom: 0.5rem;
 }
 
+h1 .marginnote,
+h2 .marginnote,
+h3 .marginnote,
+h4 .marginnote,
+h5 .marginnote {
+	font-weight: normal;
+	font-size: 1.1rem;
+	line-height: 1.3;
+	color: var(--theme-text, #111);
+}
+
+@media (min-width: 761px) {
+	h1 .marginnote,
+	h2 .marginnote,
+	h3 .marginnote,
+	h4 .marginnote,
+	h5 .marginnote {
+		width: 26.3%;
+		margin-right: 9.14%;
+	}
+}
+
 /* Article metadata shown directly below the title */
 .article-byline {
 	width: 55%;
