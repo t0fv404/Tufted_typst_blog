@@ -21,6 +21,10 @@ uv run build.py build
 # 强制完整重建
 uv run build.py build --force
 
+# 测试构建：自动使用本地 URL，不修改 config.typ
+uv run build.py build --test
+uv run build.py build -t
+
 # 只构建 HTML
 uv run build.py html
 

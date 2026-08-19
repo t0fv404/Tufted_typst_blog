@@ -13,6 +13,7 @@ Tufted Blog Template 构建脚本
 
 用法:
     uv run build.py build       # 完整构建 (HTML + PDF + 资源)
+    uv run build.py build -t    # 使用本地 URL 构建，便于本地预览
     uv run build.py html        # 仅构建 HTML 文件
     uv run build.py pdf         # 仅构建 PDF 文件
     uv run build.py assets      # 仅复制静态资源
@@ -956,7 +957,7 @@ def preview(port: int = 8000, open_browser_flag: bool = True) -> bool:
         def open_browser():
             time.sleep(1.5)  # 等待服务器启动
             url = f"http://localhost:{port}"
-            print(f"  🚀 正在打开浏览器: {url}")
+            print(f"🚀 正在打开浏览器: {url}")
             webbrowser.open(url)
 
         # 在后台线程中打开浏览器
@@ -1450,6 +1451,9 @@ def create_parser() -> argparse.ArgumentParser:
 
     build_parser = subparsers.add_parser("build", help="完整构建 (HTML + PDF + 资源)")
     build_parser.add_argument("-f", "--force", action="store_true", help="强制完整重建")
+    build_parser.add_argument(
+        "-t", "--test", action="store_true", help="使用 http://localhost:8000/ 进行测试构建"
+    )
     build_parser.add_argument("--site-url", help="覆盖站点完整 URL")
 
     html_parser = subparsers.add_parser("html", help="仅构建 HTML 文件")
@@ -1495,7 +1499,10 @@ if __name__ == "__main__":
     # 使用 match-case 执行对应的命令
     match args.command:
         case "build":
-            success = build(force, getattr(args, "site_url", None))
+            if getattr(args, "test", False):
+                success = build(True, "http://localhost:8000")
+            else:
+                success = build(force, getattr(args, "site_url", None))
         case "html":
             success = build_html(force, getattr(args, "site_url", None) or get_config_site_url())
         case "pdf":
