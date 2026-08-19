@@ -16,6 +16,7 @@ BASE STYLES
 html {
 	font-size: 10.5pt;
 	height: 100%;
+	overflow-x: clip;
 }
 
 /* Sticky footer layout */
@@ -24,6 +25,7 @@ body {
 	min-height: 100%;
 	display: flex;
 	flex-direction: column;
+	overflow-x: clip;
 }
 
 /* Main content fills remaining space */
@@ -88,6 +90,8 @@ section > figure:not(.fullwidth) > svg {
 .fullwidth {
 	width: 90vw;
 	min-width: 90vw;
+	max-width: 100%;
+	box-sizing: border-box;
 	margin-left: calc(50% - 50vw);
 	margin-right: calc(50% - 50vw);
 	clear: both;
@@ -515,6 +519,8 @@ table {
 /* Naked tables behave like the main text column */
 section > table {
 	width: auto;
+	max-width: 100%;
+	overflow-x: auto;
 	position: relative;
 	left: 27.5%;
 	transform: translateX(-50%);
@@ -697,10 +703,10 @@ header.site-nav-header {
 	position: sticky;
 	top: 0;
 	z-index: 10;
-	width: 100vw;
+	width: 100%;
 	box-sizing: border-box;
-	margin: 0 calc(50% - 50vw);
-	padding: 0.5rem calc(50vw - 50% + 0.75rem);
+	margin: 0;
+	padding: 0.5rem 0.75rem;
 	background: color-mix(in srgb, var(--theme-bg) 76%, transparent);
 	backdrop-filter: blur(14px) saturate(140%);
 	-webkit-backdrop-filter: blur(14px) saturate(140%);
