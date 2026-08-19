@@ -1500,7 +1500,7 @@ if __name__ == "__main__":
     match args.command:
         case "build":
             if getattr(args, "test", False):
-                success = build(True, "http://localhost:8000")
+                success = build(force, "http://localhost:8000")
             else:
                 success = build(force, getattr(args, "site_url", None))
         case "html":
