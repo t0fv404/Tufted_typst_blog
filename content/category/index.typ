@@ -20,7 +20,29 @@
   grouped.at(cat).push(post)
 }
 
-// 按层级路径展开：一级分类 → h2，二级分类 → h3，依次类推
+// 页面标题“文章分类”为 h2，分类路径从 h3 开始逐级缩进。
+#let category-heading(level, title) = {
+  let heading-level = level + 3
+  if heading-level <= 6 {
+    html.elem(
+      "h" + str(heading-level),
+      attrs: (class: "category-heading"),
+      title,
+    )
+  } else {
+    html.elem(
+      "div",
+      attrs: (
+        role: "heading",
+        "aria-level": str(heading-level),
+        class: "category-heading",
+      ),
+      title,
+    )
+  }
+}
+
+// 按层级路径展开：一级分类 → h3，二级分类 → h4，依次类推
 #let keys = grouped.keys().sorted()
 #for (i, cat) in keys.enumerate() {
   let parts = if cat == "" {
@@ -47,11 +69,7 @@
 
   // 只输出新出现的层级标题
   for j in range(n, parts.len()) {
-    if j == 0 {
-      html.h2(class: "heading-year", parts.at(j))
-    } else {
-      html.h3(class: "heading-month", parts.at(j))
-    }
+    category-heading(j, parts.at(j))
   }
 
   // 该分类下的文章按日期倒序

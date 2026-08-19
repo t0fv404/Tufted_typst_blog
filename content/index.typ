@@ -18,7 +18,7 @@
   let md = post.date.display("[month]")
 
   if yd != prev-year {
-    html.h2(class: "heading-year", yd)
+    html.h3(class: "heading-year", yd)
     prev-year = yd
     prev-month = ""
   }
@@ -26,7 +26,7 @@
     let month-names = ("1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月")
     let mi = int(md)
     let mname = if mi >= 1 and mi <= 12 { month-names.at(mi - 1) } else { md + "月" }
-    html.h3(class: "heading-month", mname)
+    html.h4(class: "heading-month", mname)
     prev-month = md
   }
 
