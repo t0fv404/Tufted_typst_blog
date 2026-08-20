@@ -46,6 +46,7 @@
   let effective-site-url = sys.inputs.at("site-url", default: website-url)
   let site-root = if effective-site-url == none { "" } else { effective-site-url.trim("/", at: end) }
   let site-link = path => site-root + "/" + path.trim("/", at: start)
+  let has-navigation = header-links != none
 
   // Apply styling
   show: template-math
@@ -124,7 +125,7 @@
         }
 
         // Add website navigation
-        if header-links != none {
+        if has-navigation {
           html.header(
             class: "site-nav-header",
             html.nav(
@@ -229,7 +230,7 @@
         }
 
         // Table of contents drawer
-        if header-links != none {
+        if has-navigation {
           html.elem(
             "aside",
             attrs: (id: "toc-drawer", class: "toc-drawer"),

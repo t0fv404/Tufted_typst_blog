@@ -2,6 +2,12 @@
  * Enhances rendered code blocks with language labels, line numbers, and a copy button.
  */
 document.addEventListener("DOMContentLoaded", () => {
+	function getCodeText(codeBlock) {
+		const clone = codeBlock.cloneNode(true);
+		clone.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
+		return clone.textContent;
+	}
+
 	const codeBlocks = document.querySelectorAll("pre > code");
 
 	codeBlocks.forEach((codeBlock) => {
@@ -20,14 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		// ========== Add line numbers ==========
 		// Check if already processed
 		if (!pre.querySelector(".line-numbers-rows")) {
-			// Clone to count lines correctly handling <br>
-			const clone = codeBlock.cloneNode(true);
-			const brs = clone.querySelectorAll("br");
-			brs.forEach((br) => {
-				br.replaceWith("\n");
-			});
-
-			const text = clone.textContent;
+			// Convert <br> tags before counting lines.
+			const text = getCodeText(codeBlock);
 			// Remove trailing newline if it exists to avoid extra line number
 			const cleanText = text.replace(/\n$/, "");
 			const lineCount = cleanText.split(/\r\n|\r|\n/).length;
@@ -58,17 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		// Add click event listener
 		copyButton.addEventListener("click", () => {
-			// Clone the code block to handle <br> tags correctly
-			const clone = codeBlock.cloneNode(true);
-
-			// Replace <br> tags with newlines
-			const brs = clone.querySelectorAll("br");
-			brs.forEach((br) => {
-				br.replaceWith("\n");
-			});
-
-			// Get text content (now with newlines)
-			const codeText = clone.textContent;
+			const codeText = getCodeText(codeBlock);
 
 			navigator.clipboard
 				.writeText(codeText)
