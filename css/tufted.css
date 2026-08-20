@@ -698,9 +698,9 @@ header.site-nav-header {
 	position: sticky;
 	top: 0;
 	z-index: 10;
-	width: 100%;
+	width: calc(100% + var(--left-extend, 0%));
 	box-sizing: border-box;
-	margin: 0;
+	margin: 0 0 0 calc(-1 * var(--left-extend, 0%));
 	padding: 0.5rem 0.75rem;
 	background: transparent;
 }
@@ -890,6 +890,21 @@ TABLE OF CONTENTS (Drawer)
 
 .toc-toggle-btn:hover {
 	opacity: 0.7;
+}
+
+@media (min-width: 761px) {
+	.site-nav-header .toc-toggle-btn {
+		position: absolute;
+		top: calc(50% + 0.75rem);
+		left: calc(-2.4rem - 0.5em);
+		width: 2.4rem;
+		height: 2.4rem;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transform: translateY(-50%);
+	}
 }
 
 .toc-drawer {

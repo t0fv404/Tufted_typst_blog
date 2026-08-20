@@ -109,22 +109,24 @@
       // Body
       html.body({
         // Custom header elements (site header, not navigation)
-        html.header(
-          class: "site-header",
-          {
-            for (i, element) in header-elements.enumerate() {
-              element
-              if i < header-elements.len() - 1 {
-                html.br()
+        if header-elements.len() > 0 {
+          html.header(
+            class: "site-header",
+            {
+              for (i, element) in header-elements.enumerate() {
+                element
+                if i < header-elements.len() - 1 {
+                  html.br()
+                }
               }
-            }
-          },
-        )
+            },
+          )
+        }
 
         // Add website navigation
-        html.header(
-          class: "site-header site-nav-header",
-          if header-links != none {
+        if header-links != none {
+          html.header(
+            class: "site-nav-header",
             html.nav(
               class: "site-nav",
               {
@@ -223,18 +225,20 @@
                 )
               },
             )
-          }
-        )
+          )
+        }
 
         // Table of contents drawer
-        html.elem(
-          "aside",
-          attrs: (id: "toc-drawer", class: "toc-drawer"),
-          {
-            html.div(class: "toc-drawer-inner")
-            html.div(id: "toc-resize-handle", class: "toc-resize-handle")
-          },
-        )
+        if header-links != none {
+          html.elem(
+            "aside",
+            attrs: (id: "toc-drawer", class: "toc-drawer"),
+            {
+              html.div(class: "toc-drawer-inner")
+              html.div(id: "toc-resize-handle", class: "toc-resize-handle")
+            },
+          )
+        }
 
         // Main content
         html.article(
@@ -242,14 +246,16 @@
         )
 
         // Custom footer elements
-        html.footer({
-          for (i, element) in footer-elements.enumerate() {
-            element
-            if i < footer-elements.len() - 1 {
-              html.br()
+        if footer-elements.len() > 0 {
+          html.footer({
+            for (i, element) in footer-elements.enumerate() {
+              element
+              if i < footer-elements.len() - 1 {
+                html.br()
+              }
             }
-          }
-        })
+          })
+        }
       })
     },
   )
