@@ -693,7 +693,7 @@ header.site-nav-header {
 	width: calc(100% + var(--left-extend, 0%));
 	box-sizing: border-box;
 	margin: 0 0 0 calc(-1 * var(--left-extend, 0%));
-	padding: 0.5rem 0.75rem;
+	padding: 0.5rem var(--content-right-inset, 12%) 0.5rem 0.75rem;
 	background: transparent;
 }
 
