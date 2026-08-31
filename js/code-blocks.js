@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const copyButton = document.createElement("button");
 		copyButton.className = "copy-button";
 		copyButton.textContent = "Copy";
+		let resetTimer = null;
 
 		// Add click event listener
 		copyButton.addEventListener("click", () => {
@@ -64,18 +65,24 @@ document.addEventListener("DOMContentLoaded", () => {
 				.writeText(codeText)
 				.then(() => {
 					// Success feedback
-					const originalText = copyButton.textContent;
 					copyButton.textContent = "Copied!";
 					copyButton.classList.add("copied");
 
-					setTimeout(() => {
-						copyButton.textContent = originalText;
+					if (resetTimer) clearTimeout(resetTimer);
+					resetTimer = setTimeout(() => {
+						copyButton.textContent = "Copy";
 						copyButton.classList.remove("copied");
+						resetTimer = null;
 					}, 2000);
 				})
 				.catch((err) => {
 					console.error("Failed to copy text: ", err);
 					copyButton.textContent = "Error";
+					if (resetTimer) clearTimeout(resetTimer);
+					resetTimer = setTimeout(() => {
+						copyButton.textContent = "Copy";
+						resetTimer = null;
+					}, 2000);
 				});
 		});
 
